@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Organizer Dashboard')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Organizer Dashboard</h1>
+  <p><a class="btn sm ghost" th:href="@{/organizer/payment-settings}">Payment / Route settings</a> <a class="btn sm ghost" th:href="@{/organizer/upi-payments}">Verify direct UPI payments</a></p>
+  <p class="sub">Manage events, ticketing and attendee communication.</p>
+
+  <div class="grid cols-4">
+    <div class="card stat"><div class="n" th:text="${#lists.size(events)}">0</div><div class="l">My events</div></div>
+    <div class="card stat"><div class="n" th:text="${totalRegistrations}">0</div><div class="l">Registrations</div></div>
+    <div class="card stat"><div class="n" th:text="${totalSold}">0</div><div class="l">Tickets sold</div></div>
+    <div class="card stat"><div class="n" th:text="${'₹' + #numbers.formatDecimal(revenue,1,2)}">₹0</div><div class="l">Revenue</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Event management <a class="btn sm" style="float:right" th:href="@{/organizer/events/new}">+ New event</a></h2>
+    <div class="empty" th:if="${#lists.isEmpty(events)}">You have not created any events yet.</div>
+    <table th:if="${!#lists.isEmpty(events)}">
+      <thead><tr><th>Title</th><th>Date</th><th>Venue</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="e : ${events}">
+          <td><a th:href="@{/events/{id}(id=${e.id})}" th:text="${e.title}"></a></td>
+          <td th:text="${#temporals.format(e.eventDate,'dd MMM yyyy, HH:mm')}"></td>
+          <td th:text="${e.venue}"></td>
+          <td><span class="badge" th:classappend="${e.status}" th:text="${e.status}"></span></td>
+          <td class="actions">
+            <a class="btn sm ghost" th:href="@{/organizer/events/{id}/edit(id=${e.id})}">Edit</a>
+            <a class="btn sm ghost" th:href="@{/organizer/events/{id}/tickets(id=${e.id})}">Tickets</a>
+            <a class="btn sm ghost" th:href="@{/organizer/events/{id}/messages(id=${e.id})}">Attendees</a>
+            <form th:action="@{/organizer/events/{id}/delete(id=${e.id})}" method="post" onsubmit="return confirm('Delete this event and its tickets/registrations?');">
+              <button class="btn sm bad" type="submit">Delete</button></form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="card"><h2>Registrations &amp; ticket sales</h2><div class="chart-box"><canvas id="salesChart"></canvas></div></div>
+    <div class="card"><h2>Attendees by city</h2><div class="chart-box"><canvas id="cityChart"></canvas></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Upcoming events &amp; key dates</h2>
+    <div class="empty" th:if="${#lists.isEmpty(upcoming)}">No approved upcoming events.</div>
+    <div class="msg" th:each="e : ${upcoming}">
+      <strong th:text="${e.title}"></strong> &mdash;
+      <span th:text="${#temporals.format(e.eventDate,'EEE, dd MMM yyyy, HH:mm')}"></span>
+    </div>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  new Chart(document.getElementById('salesChart'), {
+    type: 'bar',
+    data: { labels: /*[[${labels}]]*/ [], datasets: [
+      { label: 'Registrations', data: /*[[${regCounts}]]*/ [], backgroundColor: '#4f46e5' },
+      { label: 'Tickets sold', data: /*[[${soldCounts}]]*/ [], backgroundColor: '#16a34a' } ] },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+  new Chart(document.getElementById('cityChart'), {
+    type: 'doughnut',
+    data: { labels: /*[[${cityLabels}]]*/ [], datasets: [{ data: /*[[${cityValues}]]*/ [],
+      backgroundColor: ['#4f46e5','#16a34a','#d97706','#dc2626','#0891b2','#7c3aed','#db2777','#65a30d'] }] },
+    options: { maintainAspectRatio: false }
+  });
+</script>
+</body>
+</html>

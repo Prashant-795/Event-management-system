@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Login')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+  <section class="card form-narrow">
+    <div style="display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:var(--primary-soft);color:var(--primary);font-size:1.5rem;margin-bottom:20px" aria-hidden="true">✦</div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to manage your events or pick up where you left off.</p>
+    <div class="alert error" th:if="${param.error}">Invalid email or password, or the account is disabled.</div>
+    <div class="alert success" th:if="${param.logout}">You have been logged out successfully.</div>
+    <div class="alert success" th:if="${param.registered}">Your account is ready. Please sign in.</div>
+    <form th:action="@{/login}" method="post">
+      <label for="username">Email address</label>
+      <input id="username" name="username" type="email" autocomplete="username" placeholder="you@example.com" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+      <p style="margin-top:22px"><button class="btn" type="submit">Sign in <span aria-hidden="true">→</span></button></p>
+    </form>
+    <p class="meta" style="text-align:center;margin:18px 0 0">New to EventHub? <a th:href="@{/register}"><strong>Create an account</strong></a></p>
+    <details style="margin-top:22px;border-top:1px solid var(--border);padding-top:16px">
+      <summary style="cursor:pointer;color:var(--muted);font-weight:700;font-size:.9rem">Development demo accounts</summary>
+      <p class="meta" style="margin-bottom:0">Admin: admin@eventhub.com / admin123<br>Organizer: organizer@eventhub.com / organizer123<br>Attendee: attendee@eventhub.com / attendee123</p>
+      <p class="meta" style="font-size:.8rem">For local testing only. Do not use these credentials in a real deployment.</p>
+    </details>
+  </section>
+</main>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

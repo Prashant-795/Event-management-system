@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My Tickets')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>My tickets</h1>
+  <p class="sub">All tickets you have purchased.</p>
+  <div class="card" th:if="${!#lists.isEmpty(pendingUpiPayments)}">
+    <h2>Direct UPI payments awaiting verification</h2>
+    <p class="meta">These are not tickets yet. The organizer must confirm the payment arrived before tickets are issued.</p>
+    <table><thead><tr><th>Event</th><th>Amount</th><th>Reference</th><th>Status</th><th>Action</th></tr></thead><tbody>
+      <tr th:each="p : ${pendingUpiPayments}"><td th:text="${p.ticket.event.title}"></td><td th:text="${'₹' + #numbers.formatDecimal(p.amountPaise / 100.0,1,2)}"></td><td th:text="${p.upiTransactionId == null ? 'Not submitted' : p.upiTransactionId}"></td><td th:text="${p.status == 'UPI_REVIEW' ? 'Awaiting organizer verification' : 'Awaiting payment'}"></td><td><a class="btn sm ghost" th:if="${p.status == 'UPI_AWAITING_PAYMENT'}" th:href="@{/attendee/payments/direct/{id}(id=${p.id})}">Continue payment</a></td></tr>
+    </tbody></table>
+  </div>
+  <div class="card">
+    <div class="empty" th:if="${#lists.isEmpty(purchases)}">No confirmed purchases yet. <a th:href="@{/}">Find an event</a></div>
+    <table th:if="${!#lists.isEmpty(purchases)}">
+      <thead><tr><th>Reference</th><th>Event</th><th>Ticket</th><th>Qty</th><th>Total</th><th>Payment</th><th>Date</th></tr></thead>
+      <tbody>
+        <tr th:each="p : ${purchases}">
+          <td th:text="${p.reference}"></td>
+          <td><a th:href="@{/events/{id}(id=${p.ticket.event.id})}" th:text="${p.ticket.event.title}"></a></td>
+          <td th:text="${p.ticket.name}"></td>
+          <td th:text="${p.quantity}"></td>
+          <td th:text="${'₹' + #numbers.formatDecimal(p.totalAmount,1,2)}"></td>
+          <td th:text="${p.paymentMethod}"></td>
+          <td th:text="${#temporals.format(p.purchasedAt,'dd MMM yyyy, HH:mm')}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('User Management')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>User Management</h1>
+  <p class="sub">Create, edit and delete user accounts and roles.</p>
+
+  <div class="card">
+    <h2>Add user</h2>
+    <form th:action="@{/admin/users}" method="post" class="row-form">
+      <input type="text" name="name" placeholder="Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password (min 6)" required minlength="6">
+      <select name="role" style="width:auto">
+        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+      </select>
+      <button class="btn" type="submit">Create</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>All users</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="u : ${users}">
+          <td th:text="${u.name}"></td>
+          <td th:text="${u.email}"></td>
+          <td><span class="badge" th:classappend="${u.role}" th:text="${u.role}"></span></td>
+          <td th:text="${u.enabled} ? 'Active' : 'Disabled'"></td>
+          <td th:text="${#temporals.format(u.createdAt,'dd MMM yyyy')}"></td>
+          <td class="actions">
+            <a class="btn sm ghost" th:href="@{/admin/users/{id}/edit(id=${u.id})}">Edit</a>
+            <form th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post"
+                  onsubmit="return confirm('Delete this user and all their data?');">
+              <button class="btn sm bad" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

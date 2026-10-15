@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Event Updates')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Event updates</h1>
+  <p class="sub">Messages from organizers of events you are registered for.</p>
+  <div class="card">
+    <div class="empty" th:if="${#lists.isEmpty(messages)}">No updates yet.</div>
+    <div class="msg" th:each="m : ${messages}">
+      <strong th:text="${m.event.title}"></strong>
+      <div th:text="${m.content}"></div>
+      <div class="meta">From <span th:text="${m.sender.name}"></span> &middot; <span th:text="${#temporals.format(m.createdAt,'dd MMM yyyy, HH:mm')}"></span></div>
+    </div>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

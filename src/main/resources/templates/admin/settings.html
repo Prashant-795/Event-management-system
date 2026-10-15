@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('System Settings')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <div class="card form-narrow">
+    <h1>System settings</h1>
+    <form th:action="@{/admin/settings}" method="post">
+      <label>Site name</label>
+      <input type="text" name="siteName" th:value="${siteName}" required>
+      <label>Support email</label>
+      <input type="email" name="supportEmail" th:value="${supportEmail}">
+      <div class="check">
+        <input type="checkbox" id="reg" name="registrationOpen" value="true" th:checked="${registrationOpen}">
+        <label for="reg">Allow new user sign-ups</label>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="auto" name="autoApprove" value="true" th:checked="${autoApprove}">
+        <label for="auto">Auto-approve new events (skip admin review)</label>
+      </div>
+      <p><button class="btn" type="submit">Save settings</button></p>
+    </form>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

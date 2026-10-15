@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Admin Dashboard')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Admin Dashboard</h1>
+  <p><a class="btn sm ghost" th:href="@{/admin/route-accounts}">Razorpay Route accounts</a></p>
+  <p class="sub">System overview, statistics and live activity.</p>
+
+  <div class="grid cols-4">
+    <div class="card stat"><div class="n" th:text="${userCount}">0</div><div class="l">Users</div></div>
+    <div class="card stat"><div class="n" th:text="${eventCount}">0</div><div class="l">Events</div></div>
+    <div class="card stat"><div class="n" th:text="${registrationCount}">0</div><div class="l">Registrations</div></div>
+    <div class="card stat"><div class="n" th:text="${ticketsSold}">0</div><div class="l">Tickets sold</div></div>
+    <div class="card stat"><div class="n" th:text="${'₹' + #numbers.formatDecimal(revenue,1,2)}">₹0</div><div class="l">Ticket revenue</div></div>
+    <div class="card stat"><div class="n" th:text="${pendingCount}">0</div><div class="l">Awaiting approval
+      <a th:if="${pendingCount > 0}" th:href="@{/admin/events}">(review)</a></div></div>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="card"><h2>Events by status</h2><div class="chart-box"><canvas id="statusChart"></canvas></div></div>
+    <div class="card"><h2>Users by role</h2><div class="chart-box"><canvas id="roleChart"></canvas></div></div>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="card">
+      <h2>Recent events</h2>
+      <table>
+        <thead><tr><th>Title</th><th>Organizer</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr th:each="e : ${recent}">
+            <td><a th:href="@{/events/{id}(id=${e.id})}" th:text="${e.title}"></a></td>
+            <td th:text="${e.organizer.name}"></td>
+            <td><span class="badge" th:classappend="${e.status}" th:text="${e.status}"></span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="empty" th:if="${#lists.isEmpty(recent)}">No events yet.</div>
+    </div>
+    <div class="card">
+      <h2>System activity <small class="meta">(refreshes every 15s)</small></h2>
+      <div id="activity">
+        <div class="msg" th:each="a : ${activity}">
+          <div th:text="${a.message}"></div>
+          <div class="meta" th:text="${#temporals.format(a.createdAt,'dd MMM yyyy, HH:mm:ss')}"></div>
+        </div>
+        <div class="empty" th:if="${#lists.isEmpty(activity)}">No activity yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  const palette = ['#4f46e5', '#16a34a', '#dc2626', '#d97706'];
+  new Chart(document.getElementById('statusChart'), {
+    type: 'bar',
+    data: { labels: /*[[${statusLabels}]]*/ [], datasets: [{ label: 'Events', data: /*[[${statusValues}]]*/ [], backgroundColor: ['#d97706', '#16a34a', '#dc2626'] }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+  new Chart(document.getElementById('roleChart'), {
+    type: 'doughnut',
+    data: { labels: /*[[${roleLabels}]]*/ [], datasets: [{ data: /*[[${roleValues}]]*/ [], backgroundColor: palette }] },
+    options: { maintainAspectRatio: false }
+  });
+  // lightweight "real-time" monitoring: reload the page's activity panel by refreshing every 15 seconds
+  setInterval(() => {
+    fetch(window.location.href, { credentials: 'same-origin' })
+      .then(r => r.text())
+      .then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const fresh = doc.getElementById('activity');
+        if (fresh) document.getElementById('activity').innerHTML = fresh.innerHTML;
+      }).catch(() => {});
+  }, 15000);
+</script>
+</body>
+</html>

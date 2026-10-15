@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Direct UPI payment')}"></head>
+<body><div th:replace="~{fragments :: nav}"></div><div class="container"><div th:replace="~{fragments :: flash}"></div><div class="card">
+<h1>Pay directly using UPI</h1>
+<p>Event: <strong th:text="${event.title}"></strong></p>
+<p>Ticket: <span th:text="${order.ticket.name}"></span> × <span th:text="${order.quantity}"></span></p>
+<p>Total amount: <strong th:text="${'₹' + amountRupees}"></strong></p>
+<div class="alert info"><strong>Pay to this UPI ID</strong><p id="upiId" th:text="${upiId}">organizer@bank</p><p>Pay the exact amount shown above. Use the UPI app on this device or copy the UPI ID to pay from another device.</p><button class="btn sm ghost" type="button" id="copyUpi">Copy UPI ID</button> <button class="btn sm" type="button" id="openUpi">Open UPI app</button></div>
+<p><strong>Important:</strong> Your ticket is not issued immediately. After paying, enter the UPI transaction reference/UTR below. The organizer must verify the incoming credit in their bank or UPI app before tickets are issued. Do not submit a payment screenshot as proof.</p>
+<form th:action="@{/attendee/payments/direct/{id}/submit(id=${order.id})}" method="post">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+<label for="transactionId">UPI transaction reference / UTR</label><input id="transactionId" name="transactionId" maxlength="80" minlength="6" required pattern="[A-Za-z0-9-]{6,80}" placeholder="Enter reference shown in your UPI app" autocomplete="off"/>
+<button class="btn" type="submit">Submit reference for verification</button>
+</form>
+<p class="meta">This payment request expires if you do not submit the transaction reference within 15 minutes. After submitting it, the order remains pending until the organizer reviews it.</p>
+<a class="btn ghost" th:href="@{/events/{id}(id=${event.id})}">Back to event</a>
+</div></div><div th:replace="~{fragments :: footer}"></div>
+<script th:inline="javascript">
+const payee = /*[[${upiId}]]*/ '';
+const amount = /*[[${amountRupees}]]*/ '0.00';
+const payeeName = /*[[${organizerName}]]*/ 'Event organizer';
+const note = /*[[${event.title + ' ticket order ' + order.id}]]*/ 'Event ticket payment';
+document.getElementById('copyUpi').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(payee); alert('UPI ID copied.'); }
+  catch (e) { window.prompt('Copy this UPI ID:', payee); }
+});
+document.getElementById('openUpi').addEventListener('click', () => {
+  const params = new URLSearchParams({ pa: payee, pn: payeeName, am: amount, cu: 'INR', tn: note });
+  window.location.href = 'upi://pay?' + params.toString();
+});
+</script></body></html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Edit User')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <div class="card form-narrow">
+    <h1>Edit user</h1>
+    <form th:action="@{/admin/users/{id}/edit(id=${u.id})}" method="post">
+      <label>Name</label>
+      <input type="text" name="name" th:value="${u.name}" required>
+      <label>Email</label>
+      <input type="email" name="email" th:value="${u.email}" required>
+      <label>Role</label>
+      <select name="role">
+        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${r == u.role}"></option>
+      </select>
+      <div class="check">
+        <input type="checkbox" id="enabled" name="enabled" value="true" th:checked="${u.enabled}">
+        <label for="enabled">Account enabled</label>
+      </div>
+      <label>New password <span class="meta">(leave blank to keep current)</span></label>
+      <input type="password" name="password" minlength="6">
+      <p><button class="btn" type="submit">Save changes</button>
+         <a class="btn ghost" th:href="@{/admin/users}">Cancel</a></p>
+    </form>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

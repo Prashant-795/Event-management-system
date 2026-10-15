@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Secure ticket payment')}"></head>
+<body><div th:replace="~{fragments :: nav}"></div><div class="container"><div class="card">
+<h1>Complete payment</h1><p>Event: <strong th:text="${event.title}"></strong></p><p>Ticket: <span th:text="${order.ticket.name}"></span> × <span th:text="${order.quantity}"></span></p><p>Total: <strong th:text="${'₹' + amountRupees}"></strong></p>
+<p>Choose UPI (Google Pay, PhonePe, BHIM or another supported app), UPI QR, cards, net banking or another method enabled for this Razorpay account. Available options depend on your Razorpay account and the customer device.</p>
+<p>Funds are routed to the event organizer's Razorpay Route linked account. Your ticket is issued only after server-side payment verification.</p>
+<div class="meta" style="margin:12px 0;padding:12px;border:1px solid #d1d5db;border-radius:8px"><strong>Order-specific UPI QR</strong><br/>Open Razorpay Checkout and choose the UPI QR option if it is offered on your device/account. Razorpay generates the payment flow for this unique order and amount. Do not pay using a separate static QR or share a payment screenshot as proof.</div>
+<button class="btn" id="payButton" type="button">Pay with UPI QR, UPI app or another method</button> <a class="btn ghost" th:href="@{/events/{id}(id=${event.id})}">Cancel</a>
+<form id="verifyForm" th:action="@{/attendee/payments/verify}" method="post" style="display:none"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><input type="hidden" name="razorpay_order_id"/><input type="hidden" name="razorpay_payment_id"/><input type="hidden" name="razorpay_signature"/></form>
+</div></div><div th:replace="~{fragments :: footer}"></div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script th:inline="javascript">
+const options={key:/*[[${keyId}]]*/'',amount:/*[[${order.amountPaise}]]*/0,currency:'INR',name:'Event Management System',description:/*[[${event.title}]]*/'Event ticket',order_id:/*[[${order.razorpayOrderId}]]*/'',prefill:{name:/*[[${attendee.name}]]*/'',email:/*[[${attendee.email}]]*/''},theme:{color:'#4f46e5'},config:{display:{blocks:{upi_first:{name:'Pay using UPI',instruments:[{method:'upi'}]}},sequence:['block.upi_first'],preferences:{show_default_blocks:true}}},handler:function(response){const f=document.getElementById('verifyForm');f.elements['razorpay_order_id'].value=response.razorpay_order_id;f.elements['razorpay_payment_id'].value=response.razorpay_payment_id;f.elements['razorpay_signature'].value=response.razorpay_signature;f.submit();},modal:{ondismiss:function(){window.location.href='/events/'+/*[[${event.id}]]*/0;}}};
+document.getElementById('payButton').addEventListener('click',function(){if(!options.key){alert('Razorpay test credentials are not configured.');return;}new Razorpay(options).open();});
+</script></body></html>

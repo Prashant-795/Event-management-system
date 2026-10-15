@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Event')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div class="card form-narrow" style="max-width:640px">
+    <h1 th:text="${editing} ? 'Edit event' : 'Create event'">Create event</h1>
+    <p class="sub" th:if="${editing}">Saving changes sends the event back for admin approval (unless auto-approve is on).</p>
+    <form th:action="${editing} ? @{/organizer/events/{id}(id=${eventId})} : @{/organizer/events}" th:object="${form}" method="post">
+      <label for="title">Title</label>
+      <input id="title" type="text" th:field="*{title}">
+      <div class="err" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+
+      <label for="description">Description</label>
+      <textarea id="description" rows="5" th:field="*{description}"></textarea>
+      <div class="err" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+
+      <label for="eventDate">Date &amp; time</label>
+      <input id="eventDate" type="datetime-local" th:field="*{eventDate}">
+      <div class="err" th:if="${#fields.hasErrors('eventDate')}" th:errors="*{eventDate}"></div>
+
+      <label for="venue">Venue</label>
+      <input id="venue" type="text" th:field="*{venue}">
+      <div class="err" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></div>
+
+      <p><button class="btn" type="submit" th:text="${editing} ? 'Save changes' : 'Create event'">Save</button>
+         <a class="btn ghost" th:href="@{/organizer/dashboard}">Cancel</a></p>
+    </form>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head(${event.title})}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+
+  <div class="card">
+    <h1 th:text="${event.title}">Title</h1>
+    <p class="meta">
+      <span class="badge" th:classappend="${event.status}" th:text="${event.status}">APPROVED</span>
+      <span th:text="${#temporals.format(event.eventDate,'EEEE, dd MMMM yyyy, HH:mm')}"></span> &middot;
+      <span th:text="${event.venue}"></span> &middot;
+      Organised by <span th:text="${event.organizer.name}"></span> &middot;
+      <span th:text="${registeredCount}">0</span> registered
+    </p>
+    <p style="white-space:pre-line" th:text="${event.description}"></p>
+
+    <div th:if="${event.status.name() == 'APPROVED' and !past}">
+      <div th:if="${isAttendee}">
+        <form th:if="${!registered}" th:action="@{/attendee/events/{id}/register(id=${event.id})}" method="post" class="inline">
+          <button class="btn" type="submit">Register for this event</button>
+        </form>
+        <div th:if="${registered}">
+          <span class="badge APPROVED">You are registered</span>
+          <form th:action="@{/attendee/events/{id}/unregister(id=${event.id})}" method="post" class="inline">
+            <button class="btn sm bad" type="submit">Cancel registration</button>
+          </form>
+        </div>
+      </div>
+      <div class="alert info" sec:authorize="!isAuthenticated()">
+        <a th:href="@{/login}">Log in</a> or <a th:href="@{/register}">sign up</a> as an attendee to register and buy tickets.
+      </div>
+    </div>
+    <div class="alert info" th:if="${past}">This event has already taken place.</div>
+  </div>
+
+  <div class="card" th:if="${event.status.name() == 'APPROVED' and !past}">
+    <h2>Tickets</h2>
+    <div class="empty" th:if="${#lists.isEmpty(tickets)}">The organizer has not published tickets yet.</div>
+    <table th:if="${!#lists.isEmpty(tickets)}">
+      <thead><tr><th>Type</th><th>Price</th><th>Available</th><th th:if="${isAttendee}">Buy</th></tr></thead>
+      <tbody>
+        <tr th:each="t : ${tickets}">
+          <td th:text="${t.name}"></td>
+          <td th:text="${'₹' + #numbers.formatDecimal(t.price,1,2)}"></td>
+          <td th:text="${t.available}"></td>
+          <td th:if="${isAttendee}">
+            <div th:if="${t.available > 0}" class="column" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+              <form th:action="@{/attendee/payments/create-order}" method="post" class="row-form">
+                <input type="hidden" name="ticketId" th:value="${t.id}">
+                <input type="hidden" name="eventId" th:value="${event.id}">
+                <input type="number" name="quantity" value="1" min="1" max="10" style="width:70px" required>
+                <button class="btn sm" type="submit">Pay with Razorpay</button>
+              </form>
+              <form th:if="${event.organizer.upiId != null and !#strings.isEmpty(event.organizer.upiId)}" th:action="@{/attendee/payments/direct/create}" method="post" class="row-form">
+                <input type="hidden" name="ticketId" th:value="${t.id}">
+                <input type="hidden" name="eventId" th:value="${event.id}">
+                <input type="number" name="quantity" value="1" min="1" max="10" style="width:70px" required>
+                <button class="btn sm ghost" type="submit">Pay directly by UPI ID</button>
+              </form>
+              <span th:if="${event.organizer.upiId == null or #strings.isEmpty(event.organizer.upiId)}" class="meta">Direct UPI ID payment is not configured by this organizer.</span>
+            </div>
+            <span th:if="${t.available <= 0}" class="badge REJECTED">Sold out</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="meta">Razorpay tickets are issued after server-side signature and captured-payment verification. For direct UPI ID payments, the organizer must verify the actual incoming credit before tickets are issued. Never treat a screenshot or UTR alone as proof of payment.</p>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

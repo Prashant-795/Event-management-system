@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Profile')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <div class="card form-narrow">
+    <h1>My profile</h1>
+    <form th:action="@{/attendee/profile}" method="post">
+      <label>Email <span class="meta">(cannot be changed)</span></label>
+      <input type="email" th:value="${user.email}" disabled>
+      <label>Name</label>
+      <input type="text" name="name" th:value="${user.name}" required>
+      <label>Phone</label>
+      <input type="text" name="phone" th:value="${user.phone}">
+      <label>City</label>
+      <input type="text" name="city" th:value="${user.city}">
+      <label>Event preferences</label>
+      <textarea name="preferences" rows="3" maxlength="500" placeholder="e.g. tech, music, workshops" th:text="${user.preferences}"></textarea>
+      <label>New password <span class="meta">(leave blank to keep current)</span></label>
+      <input type="password" name="password" minlength="6">
+      <p><button class="btn" type="submit">Save profile</button></p>
+    </form>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

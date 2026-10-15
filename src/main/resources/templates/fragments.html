@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' | ' + ${@settingService.get('site.name','EventHub')}">EventHub</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav class="nav" th:fragment="nav">
+  <a class="brand" th:href="@{/}" th:text="${@settingService.get('site.name','EventHub')}">EventHub</a>
+  <a th:href="@{/}">Events</a>
+
+  <th:block sec:authorize="hasRole('ADMIN')">
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/users}">Users</a>
+    <a th:href="@{/admin/events}">Event Approvals</a>
+    <a th:href="@{/admin/settings}">Settings</a>
+  </th:block>
+  <th:block sec:authorize="hasRole('ORGANIZER')">
+    <a th:href="@{/organizer/dashboard}">My Events</a>
+    <a th:href="@{/organizer/events/new}">Create Event</a>
+  </th:block>
+  <th:block sec:authorize="hasRole('ATTENDEE')">
+    <a th:href="@{/attendee/dashboard}">Dashboard</a>
+    <a th:href="@{/attendee/tickets}">My Tickets</a>
+    <a th:href="@{/attendee/updates}">Updates</a>
+    <a th:href="@{/attendee/history}">History</a>
+    <a th:href="@{/attendee/profile}">Profile</a>
+  </th:block>
+
+  <span class="spacer"></span>
+  <th:block sec:authorize="!isAuthenticated()">
+    <a th:href="@{/login}">Login</a>
+    <a th:href="@{/register}">Sign up</a>
+  </th:block>
+  <th:block sec:authorize="isAuthenticated()">
+    <span class="nav-user" sec:authentication="name"></span>
+    <form th:action="@{/logout}" method="post"><button type="submit">Logout</button></form>
+  </th:block>
+</nav>
+
+<div th:fragment="flash">
+  <div class="alert success" th:if="${success}" th:text="${success}"></div>
+  <div class="alert error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<div class="footer" th:fragment="footer">
+  <span th:text="${@settingService.get('site.name','EventHub')}">EventHub</span> &middot; Online Event Management System
+</div>
+</body>
+</html>

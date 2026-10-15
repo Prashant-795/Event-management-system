@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Events')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <section class="hero">
+    <h1>Make plans. Find your people. Create memories.</h1>
+    <p>Discover experiences worth showing up for. Explore upcoming events, save your spot, and keep every ticket and update in one place.</p>
+    <a class="btn" href="#upcoming-events">Explore events <span aria-hidden="true">→</span></a>
+  </section>
+
+  <section id="upcoming-events" aria-labelledby="events-heading">
+    <div style="display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+      <div>
+        <h2 id="events-heading" style="font-size:1.55rem;margin-bottom:5px">Find your next experience</h2>
+        <p class="sub" style="margin-bottom:0">Browse the latest approved events and book your place.</p>
+      </div>
+      <span class="badge APPROVED">Upcoming events</span>
+    </div>
+
+    <form class="search" th:action="@{/}" method="get" role="search">
+      <input type="text" name="q" th:value="${q}" aria-label="Search events" placeholder="Search by event, venue or keyword…">
+      <button class="btn" type="submit"><span aria-hidden="true">⌕</span> Search events</button>
+    </form>
+
+    <div class="empty card" th:if="${#lists.isEmpty(events)}">
+      <div style="font-size:2rem;margin-bottom:8px" aria-hidden="true">✦</div>
+      <h3>No events found just yet</h3>
+      <p>Try a different search, or check back soon for new events.</p>
+    </div>
+
+    <div class="grid cols-2">
+      <article class="card event-card" th:each="e : ${events}">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <span class="badge APPROVED">Approved event</span>
+          <span class="meta" th:text="${#temporals.format(e.eventDate,'EEE, dd MMM yyyy')}">Date</span>
+        </div>
+        <h3><a th:href="@{/events/{id}(id=${e.id})}" th:text="${e.title}">Event title</a></h3>
+        <div class="meta"><span aria-hidden="true">⌖ </span><span th:text="${e.venue}">Venue</span></div>
+        <p th:text="${#strings.abbreviate(e.description, 160)}">Event description</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)">
+          <span class="meta">Hosted by <strong th:text="${e.organizer.name}">Organizer</strong></span>
+          <a class="btn sm" th:href="@{/events/{id}(id=${e.id})}">View details <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

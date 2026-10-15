@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ticket Management')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Tickets &mdash; <span th:text="${event.title}"></span></h1>
+  <p class="sub"><a th:href="@{/organizer/dashboard}">&larr; Back to dashboard</a></p>
+
+  <div class="card">
+    <h2>Add ticket type</h2>
+    <form th:action="@{/organizer/events/{id}/tickets(id=${event.id})}" method="post" class="row-form">
+      <input type="text" name="name" placeholder="e.g. General, VIP" required>
+      <input type="number" name="price" step="0.01" min="0" placeholder="Price (₹)" required>
+      <input type="number" name="quantity" min="1" placeholder="Quantity" required>
+      <button class="btn" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Ticket types &amp; sales</h2>
+    <div class="empty" th:if="${#lists.isEmpty(tickets)}">No ticket types yet.</div>
+    <table th:if="${!#lists.isEmpty(tickets)}">
+      <thead><tr><th>Edit (name / price / quantity)</th><th>Sold</th><th>Available</th><th></th></tr></thead>
+      <tbody>
+        <tr th:each="t : ${tickets}">
+          <td>
+            <form th:action="@{/organizer/tickets/{id}/update(id=${t.id})}" method="post" class="row-form">
+              <input type="hidden" name="eventId" th:value="${event.id}">
+              <input type="text" name="name" th:value="${t.name}" required>
+              <input type="number" name="price" step="0.01" min="0" th:value="${t.price}" required>
+              <input type="number" name="quantity" min="1" th:value="${t.quantity}" required>
+              <button class="btn sm" type="submit">Update</button>
+            </form>
+          </td>
+          <td th:text="${t.sold}"></td>
+          <td th:text="${t.available}"></td>
+          <td>
+            <form th:action="@{/organizer/tickets/{id}/delete(id=${t.id})}" method="post" onsubmit="return confirm('Delete this ticket type?');">
+              <input type="hidden" name="eventId" th:value="${event.id}">
+              <button class="btn sm bad" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

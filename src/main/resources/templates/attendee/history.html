@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Registration History')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Registration history</h1>
+  <p class="sub">Every event you have registered for.</p>
+  <div class="card">
+    <div class="empty" th:if="${#lists.isEmpty(registrations)}">No registrations yet.</div>
+    <table th:if="${!#lists.isEmpty(registrations)}">
+      <thead><tr><th>Event</th><th>Event date</th><th>Registered on</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${registrations}">
+          <td><a th:href="@{/events/{id}(id=${r.event.id})}" th:text="${r.event.title}"></a></td>
+          <td th:text="${#temporals.format(r.event.eventDate,'dd MMM yyyy, HH:mm')}"></td>
+          <td th:text="${#temporals.format(r.createdAt,'dd MMM yyyy')}"></td>
+          <td th:text="${r.event.eventDate.isBefore(now)} ? 'Completed' : 'Upcoming'"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

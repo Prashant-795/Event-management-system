@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Attendee Communication')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Attendees &mdash; <span th:text="${event.title}"></span></h1>
+  <p class="sub"><a th:href="@{/organizer/dashboard}">&larr; Back to dashboard</a></p>
+
+  <div class="card">
+    <h2>Send an update to all registered attendees</h2>
+    <form th:action="@{/organizer/events/{id}/messages(id=${event.id})}" method="post">
+      <textarea name="content" rows="3" maxlength="1000" placeholder="Write your message..." required></textarea>
+      <p><button class="btn" type="submit">Send message</button></p>
+    </form>
+  </div>
+
+  <div class="grid cols-2">
+    <div class="card">
+      <h2>Registered attendees (<span th:text="${#lists.size(registrations)}">0</span>)</h2>
+      <div class="empty" th:if="${#lists.isEmpty(registrations)}">No registrations yet.</div>
+      <table th:if="${!#lists.isEmpty(registrations)}">
+        <thead><tr><th>Name</th><th>Email</th><th>City</th></tr></thead>
+        <tbody>
+          <tr th:each="r : ${registrations}">
+            <td th:text="${r.attendee.name}"></td>
+            <td th:text="${r.attendee.email}"></td>
+            <td th:text="${r.attendee.city}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Sent messages</h2>
+      <div class="empty" th:if="${#lists.isEmpty(messages)}">Nothing sent yet.</div>
+      <div class="msg" th:each="m : ${messages}">
+        <div th:text="${m.content}"></div>
+        <div class="meta" th:text="${#temporals.format(m.createdAt,'dd MMM yyyy, HH:mm')}"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

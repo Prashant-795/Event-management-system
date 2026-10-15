@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Event Approvals')}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<div class="container">
+  <div th:replace="~{fragments :: flash}"></div>
+  <h1>Event Approvals</h1>
+  <p class="sub">Approve or reject events submitted by organizers.</p>
+
+  <div class="card">
+    <h2>Pending approval</h2>
+    <div class="empty" th:if="${#lists.isEmpty(pending)}">Nothing is waiting for approval.</div>
+    <table th:if="${!#lists.isEmpty(pending)}">
+      <thead><tr><th>Title</th><th>Organizer</th><th>Date</th><th>Venue</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="e : ${pending}">
+          <td><a th:href="@{/events/{id}(id=${e.id})}" th:text="${e.title}"></a></td>
+          <td th:text="${e.organizer.name}"></td>
+          <td th:text="${#temporals.format(e.eventDate,'dd MMM yyyy, HH:mm')}"></td>
+          <td th:text="${e.venue}"></td>
+          <td class="actions">
+            <form th:action="@{/admin/events/{id}/approve(id=${e.id})}" method="post"><button class="btn sm ok" type="submit">Approve</button></form>
+            <form th:action="@{/admin/events/{id}/reject(id=${e.id})}" method="post"><button class="btn sm bad" type="submit">Reject</button></form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>All events</h2>
+    <table>
+      <thead><tr><th>Title</th><th>Organizer</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr th:each="e : ${events}">
+          <td><a th:href="@{/events/{id}(id=${e.id})}" th:text="${e.title}"></a></td>
+          <td th:text="${e.organizer.name}"></td>
+          <td th:text="${#temporals.format(e.eventDate,'dd MMM yyyy, HH:mm')}"></td>
+          <td><span class="badge" th:classappend="${e.status}" th:text="${e.status}"></span></td>
+          <td class="actions">
+            <form th:if="${e.status.name() != 'APPROVED'}" th:action="@{/admin/events/{id}/approve(id=${e.id})}" method="post"><button class="btn sm ok" type="submit">Approve</button></form>
+            <form th:if="${e.status.name() != 'REJECTED'}" th:action="@{/admin/events/{id}/reject(id=${e.id})}" method="post"><button class="btn sm bad" type="submit">Reject</button></form>
+            <form th:action="@{/admin/events/{id}/delete(id=${e.id})}" method="post" onsubmit="return confirm('Delete this event permanently?');">
+              <button class="btn sm ghost" type="submit">Delete</button></form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>
